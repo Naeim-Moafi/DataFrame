@@ -1,4 +1,6 @@
 /build/
 pheno.txt
-/.gitignore/
 /.vscode/
+/html/
+/latex/
+/man/
