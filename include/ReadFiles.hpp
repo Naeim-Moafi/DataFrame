@@ -8,3 +8,158 @@
  * @copyright Copyright (c) 2024
  * 
  */
+
+#pragma once
+
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
+
+#include "fmt/core.h"
+#include "fmt/format.h"
+
+
+namespace std
+{
+    /**
+     * @brief namespace for introducting shortnames
+     * 
+     */
+    namespace shorts
+    {
+        using V_string = vector<string>;
+        using VV_string = vector<V_string>;
+        using Data = unordered_map<string, V_string>;
+        using V_double = vector<double>;
+        using V_int = vector<int>;
+    }   
+}
+
+namespace DF
+{
+    /**
+     * @brief DataFrame is class for parsing data in a given file
+     * with a give delimeter (default is comma ',').
+     * all data will be saved as string wich user can later covert to desired type
+     * 
+     */
+    class DataFrame
+    {
+        public:
+            /**
+             * @brief saving data in an unrodered map
+             * 
+             */
+            std::shorts::Data data;
+            
+            /**
+             * @brief number of rows
+             * 
+             */
+            unsigned long long n_rows;
+
+            /**
+             * @brief number of columns
+             * 
+             */
+            unsigned long long n_cols;
+
+            /**
+             * @brief Header of data, whether is the first line or will be provided by user
+             * in case of user not providing header it would be string number start from one to number of columns of the data
+             * 
+             */
+            std::shorts::V_string headers;
+
+            /**
+             * @brief an unorderd maps for missing values
+             * 
+             */
+            std::unordered_map<int, int> mising_values;
+
+            /**
+             * @brief Get the number of rows of a given data
+             * 
+             * @return int number of rows
+             */
+            
+            int get_n_rows() const;
+            /**
+             * @brief Get the number cols of a given data
+             * 
+             * @return int number of columns
+             */
+            int get_n_cols() const;
+
+            /**
+             * @brief Set the headers with user provided vector of strings
+             * 
+             * @param v_hdrs provided headers from users
+             */
+            void set_headers(std::shorts::V_string const& v_hdrs);
+
+            /**
+             * @brief Get the headers
+             * 
+             * @return std::shorts::V_string headers
+             */
+            std::shorts::V_string get_headers() const;
+
+
+            std::shorts::V_string get_by_headers() const;
+
+            /**
+             * @brief to copy current data into new data frame
+             * 
+             * @return DataFrame new data frame
+             */
+            DataFrame copy() const;
+
+            /**
+             * @brief copy the requested data by provided headers name as vector of strings into a new data frame
+             * 
+             * @param v_hdrs 
+             * @return DataFrame new data frame
+             */
+            DataFrame copy_by_hdrs(std::shorts::V_string const& v_hdrs);
+
+            /**
+             * @brief get a given header and only keep the first occurance and remove the remaning rows
+             * 
+             * @param hdr header to check the duplication 
+             */
+            void remove_duplications(std::string const& hdr);
+
+            /**
+             * @brief read files 
+             * 
+             * @param path path to input file
+             * @param delim delimiter for parsing the input file
+             * @param is_first_col_header 
+             */
+            void read_files(std::string_view path, char delim = ',', bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
+
+            /**
+             * @brief 
+             * 
+             * @param path 
+             * @param v_cols_length 
+             * @param is_first_col_header 
+             */
+            void read_files(std::string_view path,std::shorts::V_int const& v_cols_length, bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
+
+            /**
+             * @brief print n first rows off all columns
+             * 
+             * @param n 
+             */
+            void head(unsigned long long n = 5);
+        
+        private:
+            std::shorts::V_string read_lines(std::string_view path);
+            void fill_data(std::shorts::V_string const& v_strs, char delim = ',', bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
+            void fill_data(std::shorts::V_string const& v_strs, std::shorts::V_int const& v_cols_length, bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
+    };
+    
+}
