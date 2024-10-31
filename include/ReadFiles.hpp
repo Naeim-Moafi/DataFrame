@@ -18,6 +18,8 @@
 
 #include "fmt/core.h"
 #include "fmt/format.h"
+#include "fmt/ranges.h"
+#include "fmt/color.h"
 
 
 namespace std
@@ -47,11 +49,6 @@ namespace DF
     class DataFrame
     {
         public:
-            /**
-             * @brief saving data in an unrodered map
-             * 
-             */
-            std::shorts::Data data;
             
             /**
              * @brief number of rows
@@ -63,14 +60,7 @@ namespace DF
              * @brief number of columns
              * 
              */
-            unsigned long long n_cols;
-
-            /**
-             * @brief Header of data, whether is the first line or will be provided by user
-             * in case of user not providing header it would be string number start from one to number of columns of the data
-             * 
-             */
-            std::shorts::V_string headers;
+            unsigned long long n_cols;            
 
             /**
              * @brief an unorderd maps for missing values
@@ -107,7 +97,7 @@ namespace DF
             std::shorts::V_string get_headers() const;
 
 
-            std::shorts::V_string get_by_headers() const;
+            std::shorts::V_string get_by_header(std::string const& hdr);
 
             /**
              * @brief to copy current data into new data frame
@@ -122,7 +112,7 @@ namespace DF
              * @param v_hdrs 
              * @return DataFrame new data frame
              */
-            DataFrame copy_by_hdrs(std::shorts::V_string const& v_hdrs);
+            DataFrame copy_by_headers(std::shorts::V_string const& v_hdrs);
 
             /**
              * @brief get a given header and only keep the first occurance and remove the remaning rows
@@ -136,14 +126,14 @@ namespace DF
              * 
              * @param path path to input file
              * @param delim delimiter for parsing the input file
-             * @param is_first_col_header 
+             * @param is_first_col_header boolean
              */
             void read_files(std::string_view path, char delim = ',', bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
 
             /**
              * @brief 
              * 
-             * @param path 
+             * @param path std::string_view
              * @param v_cols_length 
              * @param is_first_col_header 
              */
@@ -155,8 +145,19 @@ namespace DF
              * @param n 
              */
             void head(unsigned long long n = 5);
+
+            /**
+             * @brief swap two columns with their header with each others
+             * 
+             * @param first_hdr std::string
+             * @param second_hdr std::string
+             */
+            void swap_cols_pos(std::string first_hdr, std::string second_hdr);
         
         private:
+            std::shorts::Data data;
+            std::shorts::V_string headers;
+
             std::shorts::V_string read_lines(std::string_view path);
             void fill_data(std::shorts::V_string const& v_strs, char delim = ',', bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
             void fill_data(std::shorts::V_string const& v_strs, std::shorts::V_int const& v_cols_length, bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
