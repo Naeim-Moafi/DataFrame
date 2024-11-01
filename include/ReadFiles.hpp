@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <any>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -32,7 +33,9 @@ namespace std
     {
         using V_string = vector<string>;
         using VV_string = vector<V_string>;
-        using Data = unordered_map<string, V_string>;
+        using V_any = vector<any>;
+        using VV_any =vector<vector<any>>;
+        using Data = unordered_map<string, V_any>;
         using V_double = vector<double>;
         using V_int = vector<int>;
     }   
@@ -97,7 +100,7 @@ namespace DF
             std::shorts::V_string get_headers() const;
 
 
-            std::shorts::V_string get_by_header(std::string const& hdr);
+            std::shorts::V_any get_by_header(std::string const& hdr);
 
             /**
              * @brief to copy current data into new data frame

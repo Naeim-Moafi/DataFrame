@@ -26,7 +26,6 @@ std::shorts::V_string DF::DataFrame::read_lines(std::string_view path)
     if(ifs.fail())
     {
         throw std::runtime_error(fmt::format(fg(fmt::color::red), "Error: unable to read file {}.\nPlease check your input.", path));
-        exit(EXIT_FAILURE);
     }
 
 
@@ -47,25 +46,25 @@ std::shorts::V_string DF::DataFrame::read_lines(std::string_view path)
 
 void DF::DataFrame::fill_data(std::shorts::V_string const& lines, char delim, bool is_first_col_header, std::shorts::V_string v_hdrs)
 {
-    std::shorts::VV_string vv_strs;
+    std::shorts::VV_any vv_anys;
     
     for(auto const& line : lines)
     {
         std::istringstream iss(line);
         std::string cell;
-        std::shorts::V_string v_str_tmp;
+        std::shorts::V_any v_str_tmp;
 
         while(std::getline(iss, cell, delim))
         {
             cell.erase(std::remove(cell.begin(), cell.end(), '\"'), cell.end());
             v_str_tmp.emplace_back(cell);
         }
-        vv_strs.emplace_back(v_str_tmp);
+        vv_anys.emplace_back(v_str_tmp);
     }
 
     // init n_rows and n_cols
-    n_rows = vv_strs.size();
-    n_cols = vv_strs[0].size();
+    n_rows = vv_anys.size();
+    n_cols = vv_anys[0].size();
 
     headers.resize(n_cols);
 
@@ -74,7 +73,7 @@ void DF::DataFrame::fill_data(std::shorts::V_string const& lines, char delim, bo
     {
         if(is_first_col_header)
         {
-            headers[i_col] = vv_strs[0][i_col];
+            headers[i_col] = std::any_cast<std::string>(vv_anys[0][i_col]); 
         }
         else if(v_hdrs.size() > 0)
         {
@@ -95,20 +94,21 @@ void DF::DataFrame::fill_data(std::shorts::V_string const& lines, char delim, bo
 
     for(unsigned long long i_col{0}; i_col < n_cols; ++i_col)
     {
-        std::shorts::V_string values;
+        std::shorts::V_any values;
         for(unsigned long long i_row{is_first_col_header}; i_row < n_rows; ++i_row)
         {
-            if(vv_strs[i_row].size() != n_cols)
+            if(vv_anys[i_row].size() != n_cols)
             {
                 throw std::runtime_error(fmt::format(fg(fmt::color::red), "Error: inconsistent number of columns, check row {}", i_row + 1));
-                exit(EXIT_FAILURE);
             }
 
-            values.emplace_back(vv_strs[i_row][i_col]);
+            values.emplace_back(vv_anys[i_row][i_col]);
 
             // check for the missig values
             // missing values are empty string, NA, and NAN
-            if(vv_strs[i_row][i_col] == "" || vv_strs[i_row][i_col] == "NA" || vv_strs[i_row][i_col] == "NAN")
+            if(std::any_cast<std::string>(vv_anys[i_row][i_col]) == ""   || 
+               std::any_cast<std::string>(vv_anys[i_row][i_col]) == "NA" || 
+               std::any_cast<std::string>(vv_anys[i_row][i_col]) == "NAN")
             {
                 mising_values.insert({i_row, i_col});           
             }
@@ -145,13 +145,15 @@ void DF::DataFrame::head(unsigned long long n)
     {
         for(auto const& curr_hdr : headers)
         {
-            if(data[curr_hdr][i] == "" || data[curr_hdr][i] == "NA" || data[curr_hdr][i] == "NAN")
+            if(std::any_cast<std::string>(data[curr_hdr][i]) == ""   || 
+               std::any_cast<std::string>(data[curr_hdr][i]) == "NA" || 
+               std::any_cast<std::string>(data[curr_hdr][i]) == "NAN")
             {
-                fmt::print(bg(fmt::color::red),"{:10} ", data[curr_hdr][i]);
+                fmt::print(bg(fmt::color::red),"{:10} ", std::any_cast<std::string>(data[curr_hdr][i]) /*data[curr_hdr][i]*/);
             }
             else
             {
-                fmt::print("{:10} ", data[curr_hdr][i]);
+                fmt::print("{:10} ", std::any_cast<std::string>(data[curr_hdr][i]) /*data[curr_hdr][i]*/);
             }
             
         }
@@ -165,7 +167,7 @@ std::shorts::V_string DF::DataFrame::get_headers() const
     return headers;
 }
 
-std::shorts::V_string DF::DataFrame::get_by_header(std::string const& hdr)
+std::shorts::V_any DF::DataFrame::get_by_header(std::string const& hdr)
 {
     return data[hdr];
 }
