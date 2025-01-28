@@ -85,7 +85,17 @@ std::shorts::V_string DF::DataFrame::parse_line(std::string const& line,std::sho
 
     for(auto const& [start, end] : v_cols_start_ends)
     {
-        auto cell = line.substr(start, end);
+        std::string cell;
+        try
+        {
+            cell = line.substr(start, end);
+        }
+        catch(...)
+        {
+            cell = "NA";
+        }
+        
+        // auto cell = line.substr(start, end);
         cell.erase(std::remove(cell.begin(), cell.end(), '\"'), cell.end());
         cell.erase(std::remove(cell.begin(), cell.end(), ' '), cell.end());
         v_strs.push_back(cell);
@@ -148,7 +158,7 @@ void DF::DataFrame::fill_data(std::shorts::V_string const& lines, char delim, bo
 
             // check for the missig values
             // missing values are empty string, NA, and NAN
-            if(vv_strs[i_row][i_col] == ""   || 
+            if(vv_strs[i_row][i_col].empty() || 
                vv_strs[i_row][i_col] == "NA" || 
                vv_strs[i_row][i_col] == "NAN")
             {
@@ -213,8 +223,7 @@ void DF::DataFrame::fill_data(std::shorts::V_string const& lines, std::shorts::V
 
             // check for the missig values
             // missing values are empty string, NA, and NAN
-            if(vv_strs[i_row][i_col].empty() ||
-               vv_strs[i_row][i_col] == " "  || 
+            if(vv_strs[i_row][i_col].empty() || 
                vv_strs[i_row][i_col] == "NA" || 
                vv_strs[i_row][i_col] == "NAN")
             {
@@ -248,48 +257,105 @@ void DF::DataFrame::head(unsigned long long n)
         else n = n_rows;
     }
 
+    fmt::print("{:10}|", " ");
     for(auto const& curr_hdr : headers)
     {
-        fmt::print(fmt::emphasis::bold | fg(fmt::color::green), "{:^15}|", curr_hdr); 
+        fmt::print(fmt::emphasis::bold | fg(fmt::color::green), "{:^10}|", curr_hdr.substr(0,10)); 
     }
 
-    std::string sub_separator = std::string(15,'-') + '+'; 
-    std::string separator = "";
-
-    for(size_t i{0}; i < n_cols; ++i )
-    {
+    std::string sub_separator(10, '-');
+    sub_separator += '+';
+    
+    std::string separator;
+    separator.reserve(n_cols * sub_separator.size()+1);
+    for (size_t i = 0; i < n_cols+1; ++i) {
         separator += sub_separator; 
     }
-    // fmt::println("\n{}",std::string(headers.size() * 16, '-'));
+    
     fmt::println("\n{}",std::string(separator));
 
     // std::cout << '\n';
 
-    for(unsigned long long i{0}; i < n; ++i)
+    if(n <= 10)
     {
-        for(auto const& curr_hdr : headers)
+        for(unsigned long long i{0}; i < n; ++i)
         {
-            if(data[curr_hdr][i] == ""   || 
-               data[curr_hdr][i] == "NA" || 
-               data[curr_hdr][i] == "NAN")
+            fmt::print(fg(fmt::color::green),"|{:^9}|", i+1);
+            for(auto const& curr_hdr : headers)
             {
-                fmt::print(bg(fmt::color::red),"{:^15}", data[curr_hdr][i] /*data[curr_hdr][i]*/);
-                std::cout << "|";
+                const auto& value = data[curr_hdr][i];
+                if (value.empty() || value == "NA" || value == "NAN")
+                {
+                    fmt::print(bg(fmt::color::red),"{:^10}", data[curr_hdr][i]);
+                    std::cout << "|";
+                }
+                else
+                {
+                    fmt::print("{:^10}|", data[curr_hdr][i]);
+                }
+                
             }
-            else
+
+            std::cout << "\n";
+        }
+    }
+    else
+    {
+        for(unsigned long long i{0}; i < 5; ++i)
+        {
+            fmt::print(fg(fmt::color::green),"|{:^9}|", i+1);
+            for(auto const& curr_hdr : headers)
             {
-                fmt::print("{:^15}|", data[curr_hdr][i] /*data[curr_hdr][i]*/);
+                const auto& value = data[curr_hdr][i];
+                if (value.empty() || value == "NA" || value == "NAN")
+                {
+                    fmt::print(bg(fmt::color::red),"{:^10}", data[curr_hdr][i] /*data[curr_hdr][i]*/);
+                    std::cout << "|";
+                }
+                else
+                {
+                    fmt::print("{:^10}|", data[curr_hdr][i] /*data[curr_hdr][i]*/);
+                }
+                
             }
-            
+
+            std::cout << "\n";
         }
 
-        std::cout << "\n";
+        std::cout << "\n\t.\n\t.\n\t.\n\n";
+
+        for(unsigned long long i{n-5}; i < n; ++i)
+        {
+            fmt::print(fg(fmt::color::green),"|{:^9}|", i+1);
+            for(auto const& curr_hdr : headers)
+            {
+                const auto& value = data[curr_hdr][i];
+                if (value.empty() || value == "NA" || value == "NAN")
+                {
+                    fmt::print(bg(fmt::color::red),"{:^10}", data[curr_hdr][i] /*data[curr_hdr][i]*/);
+                    std::cout << "|";
+                }
+                else
+                {
+                    fmt::print("{:^10}|", data[curr_hdr][i] /*data[curr_hdr][i]*/);
+                }
+                
+            }
+
+            std::cout << "\n";
+        }
     }
+    fmt::println("{}",std::string(separator));
 }
 
 std::shorts::V_string DF::DataFrame::get_headers() const
 {
     return headers;
+}
+
+void DF::DataFrame::set_headers(std::shorts::V_string const& v_hdrs)
+{
+    headers = v_hdrs;
 }
 
 std::shorts::V_string DF::DataFrame::get_by_header(std::string const& hdr)
@@ -321,6 +387,64 @@ void DF::DataFrame::swap_cols_pos(std::string first_hdr, std::string second_hdr)
     swap(headers[first_it - headers.begin()], headers[second_it - headers.begin()]);
 
     std::swap(data[first_hdr], data[second_hdr]);
+}
+
+void DF::DataFrame::insert_col(std::shorts::V_string const& values, std::string hdr)
+{
+    auto [_it, inserted] = data.insert({hdr, values});
+    
+    int n = 1;
+    std::string original_hdr = hdr;
+
+    while (!inserted)
+    {
+        hdr = fmt::format("{}_{}", original_hdr, n++);
+        std::tie(_it, inserted) = data.insert({hdr, values});
+    }
+    headers.push_back(hdr);
+    n_cols++;
+}
+
+void DF::DataFrame::add_col(std::shorts::V_string const& values, std::string hdr)
+                           
+{
+    insert_col(values, hdr);
+}
+
+void DF::DataFrame::add_col_of(std::string const& value, std::string hdr)
+{
+    std::shorts::V_string values(data[headers[0]].size(), value);
+    insert_col(values, hdr);
+}
+
+void DF::DataFrame::clear()
+{
+    headers.clear();
+    data.clear();
+}
+
+void DF::DataFrame::append(std::vector<DF::DataFrame>&& v_dfs)
+{
+    if(v_dfs.empty()) return;
+
+    for(auto& curr_df : v_dfs)
+    {
+        if(headers == curr_df.get_headers())
+        {
+            for(auto curr_hdr : headers)
+            {
+                data[curr_hdr].insert(data[curr_hdr].end(), curr_df.data.at(curr_hdr).begin(), curr_df.data.at(curr_hdr).end());
+            }
+        }
+        curr_df.clear();
+    }
+    n_rows = data[headers[0]].size();
+    n_cols = headers.size();
+}
+
+std::shorts::V_string&  DF::DataFrame::operator[](std::string hdr)
+{
+    return data[hdr];
 }
 
 

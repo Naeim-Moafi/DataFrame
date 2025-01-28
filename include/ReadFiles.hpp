@@ -158,6 +158,51 @@ namespace DF
              * @param second_hdr std::string
              */
             void swap_cols_pos(std::string first_hdr, std::string second_hdr);
+
+            /**
+             * @brief add a column to the end of the dataframe based on a provided vector of string
+             * 
+             * @param v_strs vector of values to add  
+             * @param hdr given header name (default new: new_col), if the header is ther it would modified the header name
+             */
+            void add_col(std::shorts::V_string const& v_values, std::string hdr = "new_col");
+
+           /**
+            * @brief dd a column to the end of the dataframe based on a provided value for all rows
+            * 
+            * @param value value to be add to all rows 
+            * @param hdr given header name (default new: new_col), if the header is ther it would modified the header name
+            */
+            void add_col_of(std::string const& value, std::string hdr = "new_col");
+            
+            /**
+             * @brief check if headers are the same then append the values
+             * 
+             * @param v_dfs 
+             */
+            void append(std::vector<DataFrame>&& v_dfs);
+
+            /**
+             * @brief to clear headers and data
+             * 
+             */
+            void clear();
+
+            /**
+             * @brief subscript operator
+             * 
+             * @param hdr 
+             * @return std::shorts::V_string 
+             */
+            std::shorts::V_string& operator[](std::string hdr);
+
+            // /**
+            //  * @brief subscript operator
+            //  * 
+            //  * @param hdr 
+            //  * @return std::shorts::V_string 
+            //  */
+            // std::shorts::V_string& operator[](std::string const& hdr) const;
         
         private:
             std::shorts::Data data;
@@ -169,6 +214,7 @@ namespace DF
             std::shorts::V_string parse_line(std::string const& line, std::shorts::V_pair_ints const& v_cols_start_ends);
             void fill_data(std::shorts::V_string const& v_lines, char delim = ',', bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
             void fill_data(std::shorts::V_string const& v_lines, std::shorts::V_pair_ints const& v_cols_start_length, bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
+            void insert_col(std::shorts::V_string const& values, std::string hdr);
     };
     
 }
