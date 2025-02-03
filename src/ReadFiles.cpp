@@ -1,10 +1,9 @@
-#include "ReadFiles.hpp"
-
-
 #include <algorithm>
 #include <exception>
+#include <fmt/os.h>
 #include <fstream>
 #include <iostream>
+#include "ReadFiles.hpp"
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -447,6 +446,34 @@ std::shorts::V_string&  DF::DataFrame::operator[](std::string hdr)
     return data[hdr];
 }
 
+void DF::DataFrame::write(std::string_view path, char delimiter)
+{
+    fmt::ostream out = fmt::output_file(path.data());
+
+    for(auto const& curr_hdr : headers)
+    {
+        out.print("{}{}", curr_hdr.substr(0,10), delimiter); 
+    }
+    out.print("\n");
+
+    for(unsigned long long i{0}; i < n_rows; ++i)
+    {
+        for(auto const& curr_hdr : headers)
+        {
+            const auto& value = data[curr_hdr][i];
+            out.print("{}{}", value, delimiter);
+            
+        }
+
+        out.print("\n");
+    }
+}
+
+void DF::DataFrame::save_as_csv(std::string_view path)
+{
+    write(path /*,delimiter=','*/);
+}
+
 
 int main()
 {
@@ -454,7 +481,7 @@ int main()
 |  _ \  __ _| |_ __ _|  ___| __ __ _ _ __ ___   ___ 
 | | | |/ _` | __/ _` | |_ | '__/ _` | '_ ` _ \ / _ \
 | |_| | (_| | || (_| |  _|| | | (_| | | | | | |  __/
-|____/ \__,_|\__\__,_|_|  |_|  \__,_|_| |_| |_|\___|)";
+|____/ \__,_|\__\__,_|_|  |_|  \__,_|_| |_| |_|\___| )";
 
         std::cout << software_name << std::endl << std::endl;
     DF::DataFrame df;

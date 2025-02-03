@@ -12,16 +12,16 @@
 #pragma once
 
 #include <any>
+#include "fmt/core.h"
+#include "fmt/color.h"
+#include "fmt/format.h"
+#include "fmt/os.h"
+#include "fmt/ranges.h"
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include "fmt/core.h"
-#include "fmt/format.h"
-#include "fmt/ranges.h"
-#include "fmt/color.h"
 
 
 namespace std
@@ -196,13 +196,20 @@ namespace DF
              */
             std::shorts::V_string& operator[](std::string hdr);
 
-            // /**
-            //  * @brief subscript operator
-            //  * 
-            //  * @param hdr 
-            //  * @return std::shorts::V_string 
-            //  */
-            // std::shorts::V_string& operator[](std::string const& hdr) const;
+            /**
+             * @brief write the dataframe in a file with given path and delimiter  
+             * 
+             * @param path 
+             * @param delimiter 
+             */
+            void write(std::string_view path, char delimiter = ',');
+
+            /**
+             * @brief saving dataframe in comma separted format file
+             * 
+             * @param path 
+             */
+            void save_as_csv(std::string_view path);
         
         private:
             std::shorts::Data data;
