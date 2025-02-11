@@ -145,6 +145,15 @@ namespace DF
             void read_text(std::string const& text,std::shorts::V_pair_ints const& v_cols_start_length, bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
 
             /**
+             * @brief read text with whitespaces
+             * 
+             * @param text the whole text we need to parse
+             * @param is_first_col_header check if the first column should be used as column or not
+             * @param v_hdrs provided headers
+             */
+            void read_text_whitespace(std::string const& text, bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
+
+            /**
              * @brief print n first rows off all columns
              * 
              * @param n 
@@ -217,8 +226,10 @@ namespace DF
 
             std::shorts::V_string read_lines(std::string_view path);
             std::shorts::V_string read_lines(std::string const& text);
+            std::shorts::V_string parse_line_whitespace(std::string const& line);
             std::shorts::V_string parse_line(std::string const& line, char delim);
             std::shorts::V_string parse_line(std::string const& line, std::shorts::V_pair_ints const& v_cols_start_ends);
+            void fill_data_whitespace(std::shorts::V_string const& v_lines, bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
             void fill_data(std::shorts::V_string const& v_lines, char delim = ',', bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
             void fill_data(std::shorts::V_string const& v_lines, std::shorts::V_pair_ints const& v_cols_start_length, bool is_first_col_header = true, std::shorts::V_string v_hdrs = {});
             void insert_col(std::shorts::V_string const& values, std::string hdr);
